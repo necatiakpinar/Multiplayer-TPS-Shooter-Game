@@ -3,11 +3,17 @@
 
 #include "BlasterCharacter.h"
 
+#include "Blaster/BlasterComponents/CombatComponent.h"
+#include "Blaster/Weapon/Weapon.h"
 #include "Camera/CameraComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
 #include "Components/WidgetComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Net/UnrealNetwork.h"
+
+
+
 
 ABlasterCharacter::ABlasterCharacter()
 {
@@ -28,11 +34,30 @@ ABlasterCharacter::ABlasterCharacter()
 
 	OverheadWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("OverheadWidget"));
 	OverheadWidget->SetupAttachment(RootComponent);
+
+	Combat = CreateDefaultSubobject<UCombatComponent>(TEXT("CombatComponent"));
+	Combat->SetIsReplicated(true);
+	
 }
+
+void ABlasterCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME_CONDITION(ABlasterCharacter, OverlappingWeapon, COND_OwnerOnly);
+}
+
+
 
 void ABlasterCharacter::BeginPlay()
 {
 	Super::BeginPlay();
+	
+}
+
+void ABlasterCharacter::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
 	
 }
 
@@ -41,15 +66,25 @@ void ABlasterCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
 	PlayerInputComponent->BindAction(TEXT("Jump"), IE_Pressed, this, &ACharacter::Jump);
+	PlayerInputComponent->BindAction(TEXT("Equip"),IE_Pressed, this, &ABlasterCharacter::EquipButtonPressed);
 	
 	PlayerInputComponent->BindAxis(TEXT("MoveForward"),this,&ABlasterCharacter::MoveForward);
 	PlayerInputComponent->BindAxis(TEXT("MoveRight"),this,&ABlasterCharacter::MoveRight);
 	PlayerInputComponent->BindAxis(TEXT("Turn"),this,&ABlasterCharacter::Turn);
 	PlayerInputComponent->BindAxis(TEXT("LookUp"),this,&ABlasterCharacter::LookUp);
 	
-	
-
 }
+
+
+void ABlasterCharacter::PostInitializeComponents()
+{
+	Super::PostInitializeComponents();
+	if (Combat)
+	{
+		Combat->Character  = this;	
+	}
+}
+
 
 void ABlasterCharacter::MoveForward(float Value)
 {
@@ -78,9 +113,40 @@ void ABlasterCharacter::LookUp(float Value)
 	AddControllerPitchInput(Value);
 }
 
-void ABlasterCharacter::Tick(float DeltaTime)
+void ABlasterCharacter::EquipButtonPressed()
 {
-	Super::Tick(DeltaTime);
-
+	
 }
+
+void ABlasterCharacter::SetOverlappingWeapon(AWeapon* Weapon)
+{
+	if (OverlappingWeapon)
+	{
+		OverlappingWeapon->ShowPickupWidget(false);
+	}
+	OverlappingWeapon = Weapon;
+	if (IsLocallyControlled())
+	{
+		if (OverlappingWeapon)
+		{
+			OverlappingWeapon->ShowPickupWidget(true);
+		}	
+	}
+	
+}
+
+void ABlasterCharacter::OnRep_OverlappingWeapon(AWeapon* LastWeapon)
+{
+	
+	if (OverlappingWeapon)
+	{
+		OverlappingWeapon->ShowPickupWidget(true);
+	}
+
+	if (LastWeapon)
+	{
+		LastWeapon->ShowPickupWidget(false);
+	}
+}
+
 
