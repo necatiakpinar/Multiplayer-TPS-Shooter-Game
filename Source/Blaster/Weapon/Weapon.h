@@ -22,7 +22,7 @@ class BLASTER_API AWeapon : public AActor
 	GENERATED_BODY()
 
 public:
-	
+	FORCEINLINE void SetWeaponState(EWeaponState State) { WeaponState = State;}
 private:
 	UPROPERTY(VisibleAnywhere, Category = "Weapon Properties")
 	class USkeletalMeshComponent* WeaponMesh;
