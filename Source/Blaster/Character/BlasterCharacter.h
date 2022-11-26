@@ -27,8 +27,6 @@ private:
 	UPROPERTY(VisibleAnywhere)
 	class UCombatComponent* Combat;
 
-public:
-	 void SetOverlappingWeapon(AWeapon* Weapon);
 	
 public:
 	ABlasterCharacter();
@@ -36,6 +34,9 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 	virtual void PostInitializeComponents() override;
+	
+	void SetOverlappingWeapon(AWeapon* Weapon);
+	bool IsWeaponEquipped();
 
 protected:
 	virtual void BeginPlay() override;
@@ -50,4 +51,6 @@ private:
 	UFUNCTION()
 	void OnRep_OverlappingWeapon(AWeapon* LastWeapon); // It can only take replicated value
 
+	UFUNCTION(Server,Reliable)
+	void ServerEquippedButtonPressed();
 };
