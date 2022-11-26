@@ -16,11 +16,21 @@ class BLASTER_API UCombatComponent : public UActorComponent
 private:
 	class ABlasterCharacter* Character;
 
+	UPROPERTY(ReplicatedUsing = OnRep_EquippedWeapon)
+	class AWeapon* EquippedWeapon;
+
 	UPROPERTY(Replicated)
-	class AWeapon* EquippedWeapon;	
+	bool bAiming;
 
 protected:
 	virtual void BeginPlay() override;
+	void SetAiming(bool bIsAiming);
+
+	UFUNCTION(Server,Reliable)
+	void ServerSetAiming(bool bIsAiming);
+
+	UFUNCTION()
+	void OnRep_EquippedWeapon();
 
 public:
 	UCombatComponent();

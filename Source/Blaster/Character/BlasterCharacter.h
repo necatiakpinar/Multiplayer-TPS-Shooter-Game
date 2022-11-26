@@ -37,6 +37,7 @@ public:
 	
 	void SetOverlappingWeapon(AWeapon* Weapon);
 	bool IsWeaponEquipped();
+	bool IsAiming();
 
 protected:
 	virtual void BeginPlay() override;
@@ -46,7 +47,9 @@ protected:
 	void Turn(float Value);
 	void LookUp(float Value);
 	void EquipButtonPressed();
-
+	void CrouchButtonPressed();
+	void AimButtonPressed();
+	void AimButtonReleased();
 private:
 	UFUNCTION()
 	void OnRep_OverlappingWeapon(AWeapon* LastWeapon); // It can only take replicated value
