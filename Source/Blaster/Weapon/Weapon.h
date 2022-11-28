@@ -25,6 +25,7 @@ class BLASTER_API AWeapon : public AActor
 public:
 	void SetWeaponState(EWeaponState State);
 	FORCEINLINE USphereComponent* GetAreaSphere() const { return AreaSphere; }
+	FORCEINLINE USkeletalMeshComponent* GetWeaponMesh() const {return WeaponMesh; }
 private:
 	UPROPERTY(VisibleAnywhere, Category = "Weapon Properties")
 	class USkeletalMeshComponent* WeaponMesh;
@@ -45,7 +46,7 @@ public:
 	
 	void ShowPickupWidget(bool bShowWidget);
 
-	UFUNCTION()
+	UFUNCTION() 
 	virtual void OnSphereOverlap(
 		UPrimitiveComponent* OverlappedComponent,
 		AActor* OtherActor,
