@@ -28,6 +28,9 @@ private:
 	UPROPERTY(EditAnywhere)
 	float AimWalkSpeed;
 
+	bool bFireButtonPressed;
+	FVector HitTarget;
+
 protected:
 	virtual void BeginPlay() override;
 	void SetAiming(bool bIsAiming);
@@ -37,6 +40,16 @@ protected:
 
 	UFUNCTION()
 	void OnRep_EquippedWeapon();
+
+	void FireButtonPressed(bool bPressed);
+
+	UFUNCTION(Server,Reliable)
+	void ServerFire();
+
+	UFUNCTION(NetMulticast,Reliable)
+	void MulticastFire();
+
+	void TraceUnderCrosshairs(FHitResult& TraceHitResult);
 
 public:
 	UCombatComponent();

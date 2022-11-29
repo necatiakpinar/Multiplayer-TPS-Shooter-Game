@@ -34,6 +34,9 @@ private:
 	FRotator StartingAimRotation;
 
 	ETurningInPlace TurningInPlace;
+
+	UPROPERTY(EditAnywhere, Category = Combat)
+	class UAnimMontage* FireWeaponMontage;
 	
 public:
 	ABlasterCharacter();
@@ -50,6 +53,10 @@ public:
 	AWeapon* GetEquippedWeapon();
 	FORCEINLINE ETurningInPlace GetTurningInPlace() const { return TurningInPlace; }
 
+	void PlayFireMontage(bool bAiming);
+
+	
+
 
 protected:
 	virtual void BeginPlay() override;
@@ -63,6 +70,9 @@ protected:
 	void AimButtonPressed();
 	void AimButtonReleased();
 	void AimOffset(float DeltaTime);
+	virtual void Jump() override;
+	void FireButtonPressed();
+	void FireButtonReleased();
 private:
 	UFUNCTION()
 	void OnRep_OverlappingWeapon(AWeapon* LastWeapon); // It can only take replicated value

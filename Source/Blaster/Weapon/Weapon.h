@@ -38,13 +38,17 @@ private:
 
 	UPROPERTY(VisibleAnywhere, Category = "Weapon Properties")
 	class UWidgetComponent* PickupWidget;
+
+	UPROPERTY(EditAnywhere, Category = "Weapon Properties")
+	class UAnimationAsset* FireAnimation;
 	
 public:	
 	AWeapon();
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 	virtual void Tick(float DeltaTime) override;
-	
 	void ShowPickupWidget(bool bShowWidget);
+	virtual void Fire(const FVector& HitTarget);
+	
 
 	UFUNCTION() 
 	virtual void OnSphereOverlap(

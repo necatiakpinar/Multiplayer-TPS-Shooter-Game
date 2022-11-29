@@ -13,7 +13,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Net/UnrealNetwork.h"
 #include "Kismet/KismetMathLibrary.h"
-
+#include "BlasterAnimInstance.h"
 
 
 ABlasterCharacter::ABlasterCharacter()
@@ -42,6 +42,7 @@ ABlasterCharacter::ABlasterCharacter()
 	GetCharacterMovement()->NavAgentProps.bCanCrouch = true;
 	GetCapsuleComponent()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera,ECollisionResponse::ECR_Ignore);
 	GetMesh()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera,ECollisionResponse::ECR_Ignore);
+	GetCharacterMovement()->RotationRate = FRotator(0.f,0.f,850.f);
 
 	TurningInPlace = ETurningInPlace::ETIP_NotTurning;
 	NetUpdateFrequency = 66.f;
@@ -61,6 +62,21 @@ AWeapon* ABlasterCharacter::GetEquippedWeapon()
 	if (Combat == nullptr) return nullptr;
 
 	return Combat->EquippedWeapon;
+}
+
+void ABlasterCharacter::PlayFireMontage(bool bAiming)
+{
+	if (Combat == nullptr || Combat->EquippedWeapon == nullptr) return;
+
+	 UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+	if (AnimInstance && FireWeaponMontage)
+	{
+		AnimInstance->Montage_Play(FireWeaponMontage);
+		FName SectionName;
+		SectionName = bAiming ? FName("RifleAim") : FName("RifleHip");
+		AnimInstance->Montage_JumpToSection(SectionName);
+	}
+		
 }
 
 void ABlasterCharacter::BeginPlay()
@@ -85,6 +101,8 @@ void ABlasterCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 	PlayerInputComponent->BindAction(TEXT("Crouch"),IE_Pressed, this, &ABlasterCharacter::CrouchButtonPressed);
 	PlayerInputComponent->BindAction(TEXT("Aim"),IE_Pressed, this, &ABlasterCharacter::AimButtonPressed);
 	PlayerInputComponent->BindAction(TEXT("Aim"),IE_Released, this, &ABlasterCharacter::AimButtonReleased);
+	PlayerInputComponent->BindAction(TEXT("Fire"),IE_Pressed, this, &ABlasterCharacter::FireButtonPressed);
+	PlayerInputComponent->BindAction(TEXT("Fire"),IE_Released, this, &ABlasterCharacter::FireButtonReleased);
 	
 	PlayerInputComponent->BindAxis(TEXT("MoveForward"),this,&ABlasterCharacter::MoveForward);
 	PlayerInputComponent->BindAxis(TEXT("MoveRight"),this,&ABlasterCharacter::MoveRight);
@@ -201,6 +219,26 @@ void ABlasterCharacter::AimOffset(float DeltaTime)
 		AO_Pitch = FMath::GetMappedRangeValueClamped(InRange, OutRange, AO_Pitch);
 	}
 	
+}
+
+void ABlasterCharacter::Jump()
+{
+	if (bIsCrouched)
+		UnCrouch();
+	else
+		Super::Jump();
+}
+
+void ABlasterCharacter::FireButtonPressed()
+{
+	if (Combat)
+		Combat->FireButtonPressed(true);
+}
+
+void ABlasterCharacter::FireButtonReleased()
+{
+	if (Combat)
+		Combat->FireButtonPressed(false);
 }
 
 void ABlasterCharacter::TurnInPlace(float DeltaTime)
