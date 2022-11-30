@@ -3,12 +3,15 @@
 
 #include "ProjectileWeapon.h"
 
-#include "Engine/SkeletalMeshSocket.h"
 #include "Projectile.h"
+#include "Engine/SkeletalMeshSocket.h"
 
 void AProjectileWeapon::Fire(const FVector& HitTarget)
 {
 	Super::Fire(HitTarget);
+
+	if (!HasAuthority()) return;
+
 	APawn* InstigatorPawn = Cast<APawn>(GetOwner());
 	const USkeletalMeshSocket* MuzzleFlashSocket = GetWeaponMesh()->GetSocketByName(FName("MuzzleFlash"));
 	if (MuzzleFlashSocket)
