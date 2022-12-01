@@ -51,6 +51,7 @@ void UBlasterAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 	Lean = FMath::Clamp(Interp, -90.0f, 90.f);
 
 	AO_Yaw = BlasterCharacter->GetAO_Yaw();
+
 	AO_Pitch = BlasterCharacter->GetAO_Pitch();
 
 	if (bWeaponEquipped && EquippedWeapon && EquippedWeapon->GetWeaponMesh() && BlasterCharacter->GetMesh())

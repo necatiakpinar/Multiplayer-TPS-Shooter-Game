@@ -41,8 +41,6 @@ void UCombatComponent::BeginPlay()
 void UCombatComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-	FHitResult HitResult;
-	TraceUnderCrosshairs(HitResult);
 	
 }
 
@@ -79,22 +77,26 @@ void UCombatComponent::FireButtonPressed(bool bPressed)
 	bFireButtonPressed = bPressed;
 
 	if (bFireButtonPressed)
-		ServerFire();
+	{
+		FHitResult HitResult;
+		TraceUnderCrosshairs(HitResult);
+		ServerFire(HitResult.ImpactPoint);
+	}
 }
 
-void UCombatComponent::ServerFire_Implementation() //This is executed on only SERVER
+void UCombatComponent::ServerFire_Implementation(const FVector_NetQuantize& TraceHitTarget) //This is executed on only SERVER
 {
-	MulticastFire(); //And server executes multicast version to send info to all clients. If you call in client, it will be only work for invoker client. 
+	MulticastFire(TraceHitTarget); //And server executes multicast version to send info to all clients. If you call in client, it will be only work for invoker client. 
 }
 
-void UCombatComponent::MulticastFire_Implementation() 
+void UCombatComponent::MulticastFire_Implementation(const FVector_NetQuantize& TraceHitTarget) 
 {
 	if (EquippedWeapon == nullptr) return;
 	
 	if (Character)
 	{
 		Character->PlayFireMontage(bFireButtonPressed);
-		EquippedWeapon->Fire(HitTarget);
+		EquippedWeapon->Fire(TraceHitTarget);
 	}
 }
 
@@ -148,26 +150,26 @@ void UCombatComponent::TraceUnderCrosshairs(FHitResult& TraceHitResult)
 			ECollisionChannel::ECC_Visibility
 		);
 
-		if (!TraceHitResult.bBlockingHit)
-		{
-			TraceHitResult.ImpactPoint = End;
-			HitTarget = End;
-		}
-		else
-		{
-			HitTarget = TraceHitResult.ImpactPoint;
+		// if (!TraceHitResult.bBlockingHit)
+		// {
+		// 	TraceHitResult.ImpactPoint = End;
+		// 	HitTarget = End;
+		// }
+		// else
+		// {
+		// 	HitTarget = TraceHitResult.ImpactPoint;
 			
-			DrawDebugSphere(
-			GetWorld(),
-			TraceHitResult.ImpactPoint,
-			12.f,
-			12,
-			FColor::Red);
+		// DrawDebugSphere(
+		// GetWorld(),
+		// TraceHitResult.ImpactPoint,
+		// 12.f,
+		// 12,
+		// FColor::Red);
 
-		}
+		// }
 	}
-	
 }
+
 
 
 
