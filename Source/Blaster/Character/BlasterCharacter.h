@@ -54,7 +54,8 @@ public:
 	FORCEINLINE ETurningInPlace GetTurningInPlace() const { return TurningInPlace; }
 
 	void PlayFireMontage(bool bAiming);
-
+	
+	FVector GetHitTarget() const;
 	
 
 

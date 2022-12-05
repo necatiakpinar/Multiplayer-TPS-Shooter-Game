@@ -11,6 +11,8 @@
 #include "Kismet/GameplayStatics.h"
 #include "Net/UnrealNetwork.h"
 #include "DrawDebugHelpers.h"
+#include "Blaster/PlayerController/BlasterPlayerController.h"
+#include "Blaster/HUD/BlasterHUD.h"
 
 #define TRACE_LENGTH 80000.f
 
@@ -41,8 +43,74 @@ void UCombatComponent::BeginPlay()
 void UCombatComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+	SetHUDCrosshairs(DeltaTime);
+
+	if (Character && Character->IsLocallyControlled())
+	{
+		FHitResult HitResult;
+		TraceUnderCrosshairs(HitResult);
+		HitTarget = HitResult.ImpactPoint;
+	}
+}
+
+void UCombatComponent::SetHUDCrosshairs(float DeltaTime)
+{
+	if (Character == nullptr || Character->Controller == nullptr) return;
+
+	Controller = Controller == nullptr ? Cast<ABlasterPlayerController>(Character->Controller) : Controller;
+	if (Controller)
+	{
+		HUD = HUD == nullptr ? Cast<ABlasterHUD>(Controller->GetHUD()) : HUD;
+		if (HUD)
+		{
+			FHUDPackage HUDPackage;
+			if (EquippedWeapon)
+			{
+		 		HUDPackage.CrosshairCenter = EquippedWeapon->CrosshairsCenter;
+				HUDPackage.CrosshairLeft = EquippedWeapon->CrosshairsLeft;
+				HUDPackage.CrosshairRight = EquippedWeapon->CrosshairsRight;
+				HUDPackage.CrosshairBottom = EquippedWeapon->CrosshairsBottom;
+				HUDPackage.CrosshairTop = EquippedWeapon->CrosshairsTop;
+			}
+			else
+			{
+				HUDPackage.CrosshairCenter = nullptr;
+				HUDPackage.CrosshairLeft = nullptr;
+				HUDPackage.CrosshairRight = nullptr;
+				HUDPackage.CrosshairBottom = nullptr;
+				HUDPackage.CrosshairTop = nullptr;
+			}
+			//Calculate cross hair spread
+			FVector2D WalkSpeedRange;
+			if (Character->GetMovementComponent()->IsCrouching())
+				WalkSpeedRange = FVector2D(0.f,Character->GetCharacterMovement()->MaxWalkSpeedCrouched);
+			else
+				WalkSpeedRange = FVector2D(0.f,Character->GetCharacterMovement()->MaxWalkSpeed);
+				
+			FVector2D VelocityMultiplieraRange(0.f,1.0f);
+			FVector Velocity = Character->GetVelocity();
+			Velocity.Z = 0.f;
+			
+			CrosshairVelocityFactor = FMath::GetMappedRangeValueClamped(WalkSpeedRange,VelocityMultiplieraRange, Velocity.Size());// Size return magnitude of the vector.
+
+			if (Character->GetCharacterMovement()->IsFalling())
+			{
+				CrosshairInAirFactor = FMath::FInterpTo(CrosshairInAirFactor,2.25f,DeltaTime,2.2f);	 
+			}
+			else
+			{
+				CrosshairInAirFactor = FMath::FInterpTo(CrosshairInAirFactor,0.f,DeltaTime,30.f);
+			}
+			
+			HUDPackage.CrosshairSpread = CrosshairVelocityFactor;
+			
+			HUD->SetHUDPackage(HUDPackage);
+		}
+		
+	}
 	
 }
+
 
 void UCombatComponent::EquipWeapon(AWeapon* WeaponToEquip)
 {
@@ -169,7 +237,3 @@ void UCombatComponent::TraceUnderCrosshairs(FHitResult& TraceHitResult)
 		// }
 	}
 }
-
-
-
-
