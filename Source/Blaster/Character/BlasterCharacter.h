@@ -37,6 +37,9 @@ private:
 
 	UPROPERTY(EditAnywhere, Category = Combat)
 	class UAnimMontage* FireWeaponMontage;
+
+	UPROPERTY(EditAnywhere, Category = Combat)
+	class UAnimMontage* HitReactMontage;
 	
 public:
 	ABlasterCharacter();
@@ -54,10 +57,12 @@ public:
 	FORCEINLINE ETurningInPlace GetTurningInPlace() const { return TurningInPlace; }
 
 	void PlayFireMontage(bool bAiming);
+	void PlayHitReactMontage();
 	
 	FVector GetHitTarget() const;
 	
-
+	UFUNCTION(NetMulticast,Unreliable)
+	void MulticastHit();
 
 protected:
 	virtual void BeginPlay() override;
