@@ -63,6 +63,12 @@ private:
 
 	UPROPERTY(BlueprintReadOnly, Category = Character, meta = (AllowPrivateAccess = "true"))
 	FRotator RightHandRotation;
+
+	UPROPERTY(BlueprintReadOnly, Category = Character, meta = (AllowPrivateAccess = "true"))
+	bool bLocallyControlled; //Use this for aim offset
+	
+	UPROPERTY(BlueprintReadOnly, Category = Character, meta = (AllowPrivateAccess = "true"))
+	bool bRotateRootBone;
 	
 public:
 	virtual void NativeBeginPlay() override;
