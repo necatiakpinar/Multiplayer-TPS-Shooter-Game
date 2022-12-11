@@ -47,6 +47,15 @@ private:
 	FRotator ProxyRotation;
 	float ProxyYaw;
 	float TimeSinceLastMovementReplication;
+
+
+	UPROPERTY(EditAnywhere,Category = "Player Stats")
+	float MaxHealth = 100.f;
+
+	UPROPERTY(ReplicatedUsing = OnRep_Health,  VisibleAnywhere, Category = "Player Stats")
+	float Health = 100.f;
+
+	class ABlasterPlayerController* BlasterPlayerController;	
 	
 public:
 	ABlasterCharacter();
@@ -94,6 +103,9 @@ protected:
 private:
 	UFUNCTION()
 	void OnRep_OverlappingWeapon(AWeapon* LastWeapon); // It can only take replicated value
+
+	UFUNCTION()
+	void OnRep_Health();
 
 	UFUNCTION(Server,Reliable)
 	void ServerEquippedButtonPressed();
