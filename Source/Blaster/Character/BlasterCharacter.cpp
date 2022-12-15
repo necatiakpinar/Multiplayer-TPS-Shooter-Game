@@ -62,13 +62,16 @@ void ABlasterCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Ou
 }
 
 
+
+
 void ABlasterCharacter::BeginPlay()
 {
 	Super::BeginPlay();
-	BlasterPlayerController = Cast<ABlasterPlayerController>(Controller);
-	if (BlasterPlayerController)
+	UpdateHUDHealth();
+
+	if (HasAuthority())
 	{
-		BlasterPlayerController->SetHUDHealth(Health,MaxHealth);
+		OnTakeAnyDamage.AddDynamic(this,&ABlasterCharacter::ReceiveDamage);
 	}
 }
 
@@ -261,7 +264,6 @@ void ABlasterCharacter::SimProxiesTurn()
 	}
 	TurningInPlace = ETurningInPlace::ETIP_NotTurning;
 	
-
 }	
 
 void ABlasterCharacter::Jump()
@@ -282,6 +284,14 @@ void ABlasterCharacter::FireButtonReleased()
 {
 	if (Combat)
 		Combat->FireButtonPressed(false);
+}
+
+void ABlasterCharacter::ReceiveDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType,
+	AController* InstigatorController, AActor* DamageCauser) //Server side
+{
+	Health = FMath::Clamp(Health - Damage,0.f,MaxHealth);
+	UpdateHUDHealth();
+	PlayHitReactMontage();
 }
 
 void ABlasterCharacter::TurnInPlace(float DeltaTime)
@@ -367,10 +377,10 @@ FVector ABlasterCharacter::GetHitTarget() const
 	return Combat->HitTarget;
 }
 
-void ABlasterCharacter::MulticastHit_Implementation()
-{
-	PlayHitReactMontage();
-}
+// void ABlasterCharacter::MulticastHit_Implementation()
+// {
+// 	PlayHitReactMontage();
+// }
 
 void ABlasterCharacter::OnRep_ReplicatedMovement()
 {
@@ -413,6 +423,17 @@ void ABlasterCharacter::PlayHitReactMontage()
 	}
 }
 
-void ABlasterCharacter::OnRep_Health()
+void ABlasterCharacter::OnRep_Health() // For Clients
 {
+	UpdateHUDHealth();
+	PlayHitReactMontage();
+}
+
+void ABlasterCharacter::UpdateHUDHealth()
+{
+	BlasterPlayerController = BlasterPlayerController == nullptr ? Cast<ABlasterPlayerController>(Controller) : BlasterPlayerController;
+	if (BlasterPlayerController)
+	{
+		BlasterPlayerController->SetHUDHealth(Health,MaxHealth);
+	}
 }

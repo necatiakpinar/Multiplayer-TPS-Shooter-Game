@@ -78,8 +78,8 @@ public:
 	
 	FVector GetHitTarget() const;
 	
-	UFUNCTION(NetMulticast,Unreliable)
-	void MulticastHit();
+	// UFUNCTION(NetMulticast,Unreliable)
+	// void MulticastHit();
 
 	virtual void OnRep_ReplicatedMovement() override;
 
@@ -100,6 +100,11 @@ protected:
 	virtual void Jump() override;
 	void FireButtonPressed();
 	void FireButtonReleased();
+	
+	UFUNCTION()
+	void ReceiveDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType, class AController* InstigatorController,AActor* DamageCauser);
+	
+	void UpdateHUDHealth();
 private:
 	UFUNCTION()
 	void OnRep_OverlappingWeapon(AWeapon* LastWeapon); // It can only take replicated value

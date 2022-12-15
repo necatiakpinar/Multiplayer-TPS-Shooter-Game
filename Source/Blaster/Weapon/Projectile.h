@@ -10,7 +10,11 @@ UCLASS()
 class BLASTER_API AProjectile : public AActor
 {
 	GENERATED_BODY()
-	
+
+protected:
+	UPROPERTY(EditAnywhere)
+	float Damage {20};
+
 private:
 	UPROPERTY(EditAnywhere)
 	class UBoxComponent* CollisionBox;
@@ -28,7 +32,8 @@ private:
 
 	UPROPERTY(EditAnywhere)
 	class USoundCue* ImpactSound;
-	
+
+		
 	
 protected:
 	virtual void BeginPlay() override;
