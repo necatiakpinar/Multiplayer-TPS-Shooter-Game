@@ -41,6 +41,9 @@ private:
 	UPROPERTY(EditAnywhere, Category = Combat)
 	class UAnimMontage* HitReactMontage;
 
+	UPROPERTY(EditAnywhere, Category = Combat)
+	class UAnimMontage* ElimMontage;
+	
 	bool bRotateRootBone;
 	float TurnThreshold = 0.5f;
 	FRotator ProxyRotationLastFrame;
@@ -55,7 +58,9 @@ private:
 	UPROPERTY(ReplicatedUsing = OnRep_Health,  VisibleAnywhere, Category = "Player Stats")
 	float Health = 100.f;
 
-	class ABlasterPlayerController* BlasterPlayerController;	
+	class ABlasterPlayerController* BlasterPlayerController;
+
+	bool bElimmed = false;
 	
 public:
 	ABlasterCharacter();
@@ -72,10 +77,11 @@ public:
 	FORCEINLINE bool ShoulRotateRootBone() const { return bRotateRootBone; }
 	AWeapon* GetEquippedWeapon();
 	FORCEINLINE ETurningInPlace GetTurningInPlace() const { return TurningInPlace; }
+	FORCEINLINE bool IsElimmed() const { return bElimmed; }
 
 	void PlayFireMontage(bool bAiming);
 	void PlayHitReactMontage();
-	
+	void PlayElimMontage();	
 	FVector GetHitTarget() const;
 	
 	// UFUNCTION(NetMulticast,Unreliable)
@@ -83,6 +89,9 @@ public:
 
 	virtual void OnRep_ReplicatedMovement() override;
 
+	UFUNCTION(NetMulticast,Reliable)
+	void Elim();
+	
 protected:
 	virtual void BeginPlay() override;
 
